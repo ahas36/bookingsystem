@@ -13,6 +13,7 @@ import entity.SubBooking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -21,6 +22,7 @@ import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 /**
@@ -54,14 +56,22 @@ public class FBS implements Serializable {
 
     @PostConstruct
     public void init() {
-        booking = new Booking();
-        List<SubBooking> tempList = new ArrayList<>();
-        tempList.add(new SubBooking());
-        booking.setSubBookingList(tempList);
+        Map<String, String> requestParameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+        try {
+            String parameter = requestParameterMap.get("bookingid");
+            booking=em.find(Booking.class, Integer.valueOf(parameter));
+            booking.getSubBookingList().add(new SubBooking());
+        } catch (Exception e) {
+            booking = new Booking();
+            List<SubBooking> tempList = new ArrayList<>();
+            tempList.add(new SubBooking());
+            booking.setSubBookingList(tempList);
+        }
         facility_type = "room";
         sub_facilities = em.createQuery("SELECT DISTINCT(m.roomType) from Room AS m").getResultList();
         sub_facility_type = sub_facilities.get(0);
         facilities = em.createQuery("SELECT new entity.KeyValue(m.facilityId,m.facility.facilityName) FROM Room AS m WHERE m.roomType=:rt").setParameter("rt", sub_facility_type).getResultList();
+
     }
 
     public Booking getBooking() {
@@ -78,13 +88,15 @@ public class FBS implements Serializable {
             List<SubBooking> subBooking = new ArrayList(booking.getSubBookingList());
             booking.setSubBookingList(null);
             booking.setUserName(em.find(Administrator.class, "admin"));
-            em.persist(booking);
+            booking=em.merge(booking);
             em.flush();
             for (SubBooking sb : subBooking.subList(0, subBooking.size() - 1)) {
                 sb.setBookingId(booking);
                 sb.setSubBookingSatuts("active");
-                em.persist(sb);
+                em.merge(sb);
+
             }
+            em.flush();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -147,20 +159,32 @@ public class FBS implements Serializable {
         booking.getSubBookingList().get(booking.getSubBookingList().size() - 1).setFacilityId(find);
         if (validateDate()) {
             booking.getSubBookingList().add(new SubBooking());
-        }
-        else
-        {
-            booking.getSubBookingList().set(booking.getSubBookingList().size() - 1,new SubBooking());
+        } else {
+            booking.getSubBookingList().set(booking.getSubBookingList().size() - 1, new SubBooking());
         }
     }
-
+    @Transactional
     public void removeSubBooking(SubBooking sb) {
         booking.getSubBookingList().remove(sb);
+        if(sb.getSubBookingId()!=null)
+        {
+            SubBooking find = em.find(SubBooking.class, sb.getSubBookingId());
+            em.remove(find);
+        }
     }
 
     public boolean validateDate() {
         int size = booking.getSubBookingList().size() - 1;
         SubBooking sb = booking.getSubBookingList().get(size);
+        if(sb.getEndDate()==null ||sb.getStartDate()==null)
+        {
+            FacesContext fc = FacesContext.getCurrentInstance();
+            FacesMessage msg = new FacesMessage("end date and start date shouldn't be null");
+            msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+            fc.addMessage("j_idt6:dp1", msg);
+            fc.renderResponse();
+            return false;
+        }
         long diffInMillies = sb.getEndDate().getTime() - sb.getStartDate().getTime();
         long hour = TimeUnit.HOURS.convert(diffInMillies, TimeUnit.MILLISECONDS);
         if (hour % sb.getFacilityId().getBookingDurationUnit() != 0) {
@@ -191,7 +215,7 @@ public class FBS implements Serializable {
             FacesContext fc = FacesContext.getCurrentInstance();
             FacesMessage msg = new FacesMessage("The facility is booked");
             msg.setSeverity(FacesMessage.SEVERITY_ERROR);
-            fc.addMessage("err", msg);
+            fc.addMessage("j_idt6:dp1", msg);
             fc.renderResponse();
             return false;
         }
@@ -209,11 +233,25 @@ public class FBS implements Serializable {
     }
 
     public double calculateTotalFee() {
-        int size = booking.getSubBookingList().size()-1;
+        int size = booking.getSubBookingList().size() - 1;
         double sum = 0;
         for (SubBooking sb : booking.getSubBookingList().subList(0, size)) {
-            sum+=calculateFee(sb);
+            sum += calculateFee(sb);
         }
         return sum;
+    }
+
+    @Transactional
+    public void removeBooking(Booking booking) {
+        try {
+            for (SubBooking sb : booking.getSubBookingList()) {
+                SubBooking s = em.find(sb.getClass(), sb.getSubBookingId());
+                em.remove(s);
+            }
+            Booking b = em.find(booking.getClass(), booking.getBookingId());
+            em.remove(b);
+        } catch (Exception e) {
+            System.out.println("controler.FBS.removeBooking()");
+        }
     }
 }

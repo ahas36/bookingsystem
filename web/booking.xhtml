@@ -13,7 +13,9 @@
         <link rel="stylesheet" href="resources/css/bootstrap.min.css" />
         <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" />     
 
-
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <script type="text/javascript">
             function loadjs()
             {
@@ -32,100 +34,116 @@
                 loadjs();
             });
         </script>
+        <style>
+            .inlineFormItems
+            {
+                margin-right: 32px;
+                height: 34px !important;
+                min-width: 10%;
+            }
+        </style>
     </h:head>
-    <h:body>
+    <h:body >
         <f:view>
-            <h:form>
-                <h1><h:outputText value="Create/Edit"/></h1>
-                <h:panelGrid columns="3">
-                    <h:outputLabel value="member" for="member" />
-                    <h:inputText class="form-control" value="#{fBS.booking.memberId}" required="true" id="member">
-                        <f:converter converterId="convertor.member" />
-                    </h:inputText>
-                    <h:message class="label-warning" for="member" style="color:red" />                       
-                </h:panelGrid>
-                <h:panelGroup id="addSubBooking">
+            <div class="container">
+                <div class="col-md-12">
+                    <div class="row">
+                        <h:form style="">
+                            <h1><h:outputText value="Create"/></h1>
+                            <fieldset class="form-group">
+                                <label for="member">Member ID:</label>
+                                <h:inputText class="form-control" value="#{fBS.booking.memberId}" required="true" id="member" immediate="true">
+                                    <f:converter converterId="convertor.member" />
+                                </h:inputText>
+                                <strong><h:message class=" alert-danger" for="member" /> </strong>
+
+                            </fieldset>
+                            <h:panelGroup id="addSubBooking">
 
 
-                    <table>
-                        <tr>
-                            <td>
-                                <h:selectOneMenu  class="form-control" id="facilitytypelist" value="#{fBS.facility_type}" >
-                                    <f:ajax onevent="loadjs"  event="change" execute="facilitytypelist" render="subtypelist facilityList"/>
-                                    <f:selectItem itemValue="Room" itemLabel="room" />
-                                    <f:selectItem itemValue="Equipment" itemLabel="equipment" />
-                                </h:selectOneMenu>
-                            </td>
-
-                            <td>
-                                <h:selectOneMenu class="form-control" id="subtypelist" value="#{fBS.sub_facility_type}" >
-                                    <f:ajax onevent="loadjs" event="change" execute="subtypelist" render="facilityList"/>
-                                    <f:selectItems value="#{fBS.sub_facilities}" />
-                                </h:selectOneMenu>
-
-                            </td> 
-
-                            <td>
-                                <h:selectOneMenu class="form-control" id="facilityList" value="#{fBS.selectedFacil}">
-                                    <f:selectItems value="#{fBS.facilities}" var="facil" itemLabel="#{facil.value}" itemValue="#{facil.key}"/>
-                                </h:selectOneMenu>
-                            </td> 
-                            <td>
-                                <div class="form-group">
-                                    <div class='input-group date' id='datetimepicker6'>
-                                        <h:inputText  styleClass="form-control" value="#{fBS.booking.subBookingList.get(fBS.booking.subBookingList.size()-1).startDate}" required="true">
-                                            <f:convertDateTime pattern="mm/dd/yyyy hh:mm a" timeZone="Australia/Melbourne"/>
-
-                                        </h:inputText>
-                                        <span class="input-group-addon">
-                                            <span class="glyphicon glyphicon-calendar"></span>
-                                        </span>
+                                <fieldset class="form-group form-inline">
+                                    <div class="form-group">
+                                        <h:selectOneMenu  styleClass="form-control inlineFormItems" id="facilitytypelist" value="#{fBS.facility_type}"  >
+                                            <f:ajax onevent="loadjs"  event="change" execute="facilitytypelist" render="subtypelist facilityList"/>
+                                            <f:selectItem itemValue="Room" itemLabel="room" />
+                                            <f:selectItem itemValue="Equipment" itemLabel="equipment" />
+                                        </h:selectOneMenu>
                                     </div>
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="form-group">
-                                    <div class='input-group date' id='datetimepicker7'>
-                                        <h:inputText value="#{fBS.booking.subBookingList.get(fBS.booking.subBookingList.size()-1).endDate}" class="form-control" required="true" >
-                                            <f:convertDateTime pattern="mm/dd/yyyy hh:mm a" timeZone="Australia/Melbourne"/>
-                                        </h:inputText>
-                                        <span class="input-group-addon">
-                                            <span class="glyphicon glyphicon-calendar"></span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </td> 
-                            <td>
-                                <h:commandButton value="add" action="#{fBS.addSubBooking()}">
-                                </h:commandButton>
-                            </td>
-                        </tr>
-                    </table>
-                </h:panelGroup>
+                                    <h:selectOneMenu class="form-control inlineFormItems" id="subtypelist" value="#{fBS.sub_facility_type}" >
+                                        <f:ajax onevent="loadjs" event="change" execute="subtypelist" render="facilityList"/>
+                                        <f:selectItems value="#{fBS.sub_facilities}" />
+                                    </h:selectOneMenu>
 
-                <h:dataTable id="addedList" class="table-striped table-bordered"   value="#{fBS.booking.subBookingList.subList(0, fBS.booking.subBookingList.size()-1)}" var="sb">
-                    <h:column>
-                        #{sb.facilityId.facilityName}
-                    </h:column>
-                    <h:column>
-                        #{sb.startDate}
-                    </h:column>
-                    <h:column>
-                        #{sb.endDate}
-                    </h:column>
-                    <h:column rendered='#{fBS.booking.memberId.memberType.equals("student")}'>
-                        #{fBS.calculateFee(sb)}
-                    </h:column>
-                    <h:column>
-                        <h:commandButton value="remove" action="#{fBS.removeSubBooking(sb)}" immediate="true">
-                        </h:commandButton>
-                    </h:column>
-                </h:dataTable>
-                <h:panelGroup rendered='#{fBS.booking.memberId.memberType.equals("student")}'>
-                        total fee = #{fBS.calculateTotalFee()}
-                </h:panelGroup>
-                <h:commandButton disabled="#{fBS.booking.subBookingList.size()==1}" value="add booking" action="#{fBS.createBooking()}" immediate="true"/>
-            </h:form>
+                                    <h:selectOneMenu class="form-control inlineFormItems" id="facilityList" value="#{fBS.selectedFacil}">
+                                        <f:selectItems value="#{fBS.facilities}" var="facil" itemLabel="#{facil.value}" itemValue="#{facil.key}"/>
+                                    </h:selectOneMenu>
+
+                                    <div class="form-group">
+                                        <div class='input-group date inlineFormItems' id='datetimepicker6'>
+                                            <h:inputText id="dp1"  styleClass="form-control" value="#{fBS.booking.subBookingList.get(fBS.booking.subBookingList.size()-1).startDate}">
+                                                <f:convertDateTime pattern="mm/dd/yyyy hh:mm a" timeZone="Australia/Melbourne"/>
+
+                                            </h:inputText>
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <div class='input-group date inlineFormItems' id='datetimepicker7'>
+                                            <h:inputText id="dp2" value="#{fBS.booking.subBookingList.get(fBS.booking.subBookingList.size()-1).endDate}" class="form-control" >
+                                                <f:convertDateTime pattern="mm/dd/yyyy hh:mm a" timeZone="Australia/Melbourne"/>
+                                            </h:inputText>
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+                                    <h:commandButton value="add" class="btn btn-info pull-right" action="#{fBS.addSubBooking()}">
+                                    </h:commandButton>
+
+                                </fieldset>
+                                <fieldset class="form-group">
+                                    <strong><h:message class=" alert-danger" for="dp1" /> </strong>
+                                    <strong><h:message class=" alert-danger" for="dp2" /> </strong>
+                                </fieldset>
+                            </h:panelGroup>
+                            <h:panelGroup class="table-responsive" rendered="#{fBS.booking.subBookingList.size()!=1}">
+                                <h:dataTable id="addedList" class="table table-bordered table-hover table-striped"   value="#{fBS.booking.subBookingList.subList(0, fBS.booking.subBookingList.size()-1)}" var="sb">
+                                    <h:column>
+                                        <f:facet name="header">Facility Name</f:facet>
+                                        #{sb.facilityId.facilityName}
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">Start Bookin Date</f:facet>
+                                        #{sb.startDate}
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">End Bookin Date</f:facet>
+                                        #{sb.endDate}
+                                    </h:column>
+                                    <h:column rendered='#{fBS.booking.memberId.memberType.equals("student")}'>
+                                        <f:facet name="header">Fee</f:facet>
+                                        #{fBS.calculateFee(sb)}
+                                    </h:column>
+                                    <h:column>
+                                        <h:commandButton value="remove" class="btn btn-danger" action="#{fBS.removeSubBooking(sb)}" immediate="true">
+                                        </h:commandButton>
+                                    </h:column>
+                                </h:dataTable>
+                            </h:panelGroup>
+                            <h:panelGroup rendered='#{fBS.booking.memberId.memberType.equals("student")}'>
+                                total fee = #{fBS.calculateTotalFee()}
+                            </h:panelGroup>
+                            <h:commandButton class="btn btn-info pull-right" disabled="#{fBS.booking.subBookingList.size()==1}" value="add booking" action="#{fBS.createBooking()}" />
+                        </h:form>
+                    </div>
+                </div>
+            </div>
         </f:view>
 
     </h:body>

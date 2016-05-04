@@ -5,49 +5,109 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <h:head>
-        <title>Facelet Title</title>
+        <title>FBS</title>
+
+        <script type="text/javascript" src="resources/js/jquery.min.js"></script>
+        <script type="text/javascript" src="resources/js/moment.min.js"></script>
+        <script type="text/javascript" src="resources/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="resources/js/bootstrap-datetimepicker.min.js"></script>
+        <link rel="stylesheet" href="resources/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" />     
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <script>
+            $(function () {
+                $(".mainTable table tr").click(function () {
+                    id = $(this).index() + 1;
+                    $(".sbs  span").addClass("invi");
+                    $(".sbs  span:nth-child(" + id + ")").removeClass("invi");
+                });
+            });
+        </script>
+        <style>
+            .invi{
+                display: none;
+            }
+        </style>
     </h:head>
     <h:body>
-        <f:view>
+        <div class="container">
+            <div class="col-md-12">
+                <f:view>
+                    <h:form>
+                        <h1><h:outputText value="Bookings"/></h1>
+
+                        <div class="table-responsive mainTable">
+                            <h:dataTable value="#{fBS.allBookings}" var="item" class="table table-bordered table-hover table-striped">
+                                <h:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="BookingId"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.bookingId}"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="UserName"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.userName.userName}"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="MemberId"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.memberId.memberId}"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Edit"/>
+                                    </f:facet>
+                                    <h:link class="btn btn-success" value="Edit" outcome="booking" >
+                                        <f:param name="bookingid" value="#{item.bookingId}" />
+                                    </h:link>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        <h:outputText value="Delete"/>
+                                    </f:facet>
+                                    <h:commandButton value="remove" class="btn btn-danger" action="#{fBS.removeBooking(item)}" immediate="true">
+                                    </h:commandButton>
+                                </h:column>
+                            </h:dataTable>
+                        </div>
+                        <div class="sbs">
 
 
-            <h:form>
-                <ul>
-                    <h1><h:outputText value="List"/></h1>
-                    <ui:repeat  value="#{fBS.allBookings}" var="item">
-                       
-                            <li style="float: left;margin: 10px;padding: 10px">
+                            <ui:repeat value="#{fBS.allBookings}" var="booking" varStatus="status">
+                                <h:panelGroup class="table-responsive invi">
+                                    <h:dataTable id="addedList" class="table table-bordered table-hover table-striped"   value="#{booking.subBookingList}" var="sb">
+                                        <h:column>
+                                            <f:facet name="header">Facility Name</f:facet>
 
-                                <h:outputText value="#{item.bookingId}"/>
-                            </li>
-                            <li style="float: left;margin: 10px;padding: 10px">
+                                            #{sb.facilityId.facilityName}
+                                        </h:column>
+                                        <h:column>
+                                            <f:facet name="header">Start Booking Date</f:facet>
+                                                #{sb.startDate}
+                                        </h:column>
+                                        <h:column>
+                                            <f:facet name="header">End Booking Date</f:facet>
+                                                #{sb.endDate}
+                                        </h:column>
+                                        <h:column rendered='#{booking.memberId.memberType.equals("student")}'>
+                                            <f:facet name="header">Fee</f:facet>
+                                                #{fBS.calculateFee(sb)}
+                                        </h:column>
+                                    </h:dataTable>
+                                </h:panelGroup>
+                            </ui:repeat>
+                        </div>
+                    </h:form>
+                </f:view>
+                <a class="btn btn-block btn-lg btn-link" href="faces/booking.xhtml">Add</a>
+            </div>
+        </div>
 
-                                <h:outputText value="#{item.userName.userName}"/>
-                            </li>
-                            <li style="float: left;margin: 10px;padding: 10px">
-
-                                <h:outputText value='#{item.memberId.firstName.concat(" ").concat(item.memberId.lastName) }'/>
-                            </li>
-                        <br style="clear: both"/>
-                        <ul>
-                            <li>
-                                <h:dataTable value="#{item.subBookingList}" var="sb">
-                                    <h:column>
-                                        #{sb.facilityId.facilityName}
-                                    </h:column>
-                                    <h:column>
-                                        #{sb.startDate}
-                                    </h:column>
-                                    <h:column>
-                                        #{sb.endDate}
-                                    </h:column>
-                                </h:dataTable>
-                            </li>
-                        </ul>
-                    </ui:repeat></ul>
-            </h:form>
-        </f:view>
-        <a href="faces/booking.xhtml">add</a>
     </h:body>
 </html>
 
