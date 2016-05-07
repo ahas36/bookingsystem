@@ -48,12 +48,12 @@ public class SubBooking implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "START_DATE")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
     @Basic(optional = false)
     @NotNull
     @Column(name = "END_DATE")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
     @Basic(optional = false)
     @NotNull

@@ -162,7 +162,7 @@ public class Members implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Members[ memberId=" + memberId + " ]";
+        return this.firstName+ " " + this.lastName+ " (ID: "+this.memberId+")";
     }
     
 }

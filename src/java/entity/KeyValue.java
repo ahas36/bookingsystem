@@ -12,7 +12,7 @@ package entity;
 public class KeyValue {
     Integer key;
     String value;
-
+    Integer time;
     public Integer getKey() {
         return key;
     }
@@ -29,15 +29,25 @@ public class KeyValue {
         this.value = Value;
     }
 
-    public KeyValue(Integer key, String Value) {
+    public KeyValue(Integer key, String Value,Integer time) {
         this.key = key;
         this.value = Value;
+        this.time=time;
     }
 
     @Override
     public String toString() {
         return value.toString(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public Integer getTime() {
+        return time;
+    }
+
+    public void setTime(Integer time) {
+        this.time = time;
+    }
+    
     
     
 }

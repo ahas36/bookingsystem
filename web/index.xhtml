@@ -13,6 +13,8 @@
         <script type="text/javascript" src="resources/js/bootstrap-datetimepicker.min.js"></script>
         <link rel="stylesheet" href="resources/css/bootstrap.min.css" />
         <link rel="stylesheet" href="resources/css/bootstrap-datetimepicker.min.css" />     
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/t/dt/dt-1.10.11/datatables.min.css"/>
+        <script type="text/javascript" src="https://cdn.datatables.net/t/dt/dt-1.10.11/datatables.min.js"></script>
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -23,6 +25,7 @@
                     $(".sbs  span").addClass("invi");
                     $(".sbs  span:nth-child(" + id + ")").removeClass("invi");
                 });
+                $(".results").DataTable();
             });
         </script>
         <style>
@@ -37,9 +40,8 @@
                 <f:view>
                     <h:form>
                         <h1><h:outputText value="Bookings"/></h1>
-
                         <div class="table-responsive mainTable">
-                            <h:dataTable value="#{fBS.allBookings}" var="item" class="table table-bordered table-hover table-striped">
+                            <h:dataTable value="#{fBS.allBookings}" var="item" class="table table-bordered table-hover table-striped results">
                                 <h:column>
                                     <f:facet name="header">
                                         <h:outputText value="BookingId"/>
@@ -56,7 +58,7 @@
                                     <f:facet name="header">
                                         <h:outputText value="MemberId"/>
                                     </f:facet>
-                                    <h:outputText value="#{item.memberId.memberId}"/>
+                                    <h:outputText value="#{item.memberId}"/>
                                 </h:column>
                                 <h:column>
                                     <f:facet name="header">
@@ -104,7 +106,11 @@
                         </div>
                     </h:form>
                 </f:view>
-                <a class="btn btn-block btn-lg btn-link" href="faces/booking.xhtml">Add</a>
+                <a class="btn btn-block btn-lg btn-link" href="booking.xhtml">Add</a>
+                <form action="Facility.xhtml" method="get" target="_blank">
+                    Facility ID: <input type="text" name="facilityID"/><br/>
+                        <input type="submit" value="search"/>
+                </form>
             </div>
         </div>
 
